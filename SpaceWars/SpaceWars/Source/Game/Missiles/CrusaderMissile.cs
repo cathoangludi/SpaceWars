@@ -67,6 +67,18 @@ namespace SpaceWars {
 
         public override void ActivateSpecial () {
             if ( specialTimerDelay < 0 ) {
+                foreach ( CrusaderShield shield in GameScreen.player1.shields ) {
+                    if ( !shield.isWithinCMRadius ( _position ) && shield.isAlive)
+                        return;
+                }
+                foreach ( CrusaderShield shield in GameScreen.player2.shields ) {
+                    if ( !shield.isWithinCMRadius ( _position ) && shield.isAlive)
+                        return;
+                }
+                if ( !GameScreen.player1.isWithinRadius ( _position, (Player.texCrusaderShield.Width * Scale ) / 2 ) ||
+                     !GameScreen.player2.isWithinRadius ( _position, ( Player.texCrusaderShield.Width * Scale ) / 2 ) )
+                    return;
+             
                 Player.shields.Add ( new CrusaderShield ( CommandCenter._gameScreen, Player, Player.texCrusaderShield, _position ) );
                 Player._currentActive = null;
                 Player.stasisDelay = 1.0f;
@@ -84,7 +96,7 @@ namespace SpaceWars {
         public override void resolveCollision ( CommandCenter collider ) {
             if ( boxCollider.Intersects ( collider.boxCollider ) ) {
                 if ( Player != collider ) {
-                    collider.Hit ();
+                    collider.Hit (10);
                     Player._currentActive = null;
                     isAlive = false;
                 }

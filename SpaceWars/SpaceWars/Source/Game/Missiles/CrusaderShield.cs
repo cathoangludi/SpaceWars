@@ -24,7 +24,19 @@ namespace SpaceWars {
             radius = ( _texture.Width * Scale ) / 2;
             hp = 100;
             _player = player;
+            GameScreen.gameSFXs["powerup"].Play ();
+            GameScreen.particleSystem.AddExplosion3 ( _position );
 
+        }
+
+        public bool isWithinCMRadius ( Vector2 colPosition) {
+
+            float distance = ( _position - colPosition ).Length ();
+
+            if ( !( distance < radius*2 + 100) )
+                return true;
+
+            return false;
         }
 
         public void Update ( GameTime gameTime ) {
@@ -53,7 +65,19 @@ namespace SpaceWars {
             if ( !isAlive )
                 return;
 
-            spriteBatch.Draw ( _texture,
+            if (_player == GameScreen.player2) {
+                spriteBatch.Draw(_texture,
+                    _position,
+                    null,                  // Rectangle <nullable>
+                    new Color(255, 0, 0, 255),
+                    _rotation,
+                    _origin,
+                    Scale,
+                    _spriteEffect,
+                    0);
+            }
+            else {
+                spriteBatch.Draw(_texture,
                 _position,
                 null,                  // Rectangle <nullable>
                 new Color(200, 200, 255, 255),
@@ -61,7 +85,8 @@ namespace SpaceWars {
                 _origin,
                 Scale,
                 _spriteEffect,
-                0 );   
+                0);
+            }
 
             Color color = Color.GreenYellow;
             if ( hp < 20 ) 
@@ -85,7 +110,9 @@ namespace SpaceWars {
                 collider.isAlive = false;
                 collider.Player._currentActive = null;
                 Hit();
+                GameScreen.particleSystem.AddExplosion ( collider.Position );
             }
+
         }
 
         public void resolveCollision ( Asteroid collider ) {
@@ -102,7 +129,7 @@ namespace SpaceWars {
 
         public void Hit () {
             hp -= 10;
-            _screen.playSFX ( "explode" );
+            GameScreen.gameSFXs["explode02"].Play ();
             if ( hp <= 0 ) {
                 isAlive = false;
             }

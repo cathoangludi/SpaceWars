@@ -152,7 +152,9 @@ namespace SpaceWars {
         public virtual void resolveCollision ( Missile collider ) {
             GameScreen.deadAsteroids.Enqueue ( this );
             isAlive = false;
+            GameScreen.gameSFXs["explode"].Play ();
             GameScreen.currentNumAsteroids--;
+            GameScreen.particleSystem.AddExplosion2 ( _position );
         }
 
         public void resolveCollision ( CommandCenter collider ) {
@@ -164,7 +166,7 @@ namespace SpaceWars {
             if (!(distance < radius + collider.radius))
                 return;
 
-            collider.Hit();
+            collider.Hit(6);
             GameScreen.deadAsteroids.Enqueue ( this );
             isAlive = false;
             GameScreen.currentNumAsteroids--;

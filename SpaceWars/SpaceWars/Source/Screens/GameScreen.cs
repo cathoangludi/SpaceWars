@@ -36,7 +36,7 @@ namespace SpaceWars
         private Random random;
         private KeyboardState prevState;
 
-        public static Dictionary<string, SoundEffect> gameSFXs;
+        private Dictionary<string, SoundEffect> gameSFXs;
 
 
         // Data (assets needed for certain tasks)
@@ -50,8 +50,8 @@ namespace SpaceWars
         public static Queue<Asteroid> deadAsteroids;
 
         // Settings
-        private const uint NUM_ASTEROIDS = 16;
-        private const uint NUM_POWERUPS = 9;
+        private const uint NUM_ASTEROIDS = 10;
+        private const uint NUM_POWERUPS = 10;
         public static int currentNumAsteroids;
         public static int currentNumPowerUps;
 
@@ -95,32 +95,23 @@ namespace SpaceWars
             for (int i = 0; i < NUM_ASTEROIDS; i++)
             {
                 Asteroid tmpAsteroid = new Asteroid(texAsteroid, Vector2.Zero);
-                tmpAsteroid.Mass = random.Next(1, 5);
                 asteroids.Add(tmpAsteroid);
                 deadAsteroids.Enqueue ( tmpAsteroid );
             }
 
             for (int i = 0; i < NUM_POWERUPS; i++)
             {
-                int randPowerUp = random.Next(0, 3);
+                int randPowerUp = random.Next(0, 2);
                 Asteroid tmpPowerUp;
                 switch (randPowerUp)
                 {
                     case 0 :
                         tmpPowerUp = new AhhSteroidCrusader(texAsteroid, Vector2.Zero);
-                        tmpPowerUp.Mass = random.Next(1, 8);
                         asteroids.Add(tmpPowerUp);
                         deadAsteroids.Enqueue(tmpPowerUp);
                         break;
                     case 1 :
                         tmpPowerUp = new AhhSteroidPORT(texAsteroid, Vector2.Zero);
-                        tmpPowerUp.Mass = random.Next(1, 8);
-                        asteroids.Add(tmpPowerUp);
-                        deadAsteroids.Enqueue(tmpPowerUp);
-                        break;
-                    case 2 :
-                        tmpPowerUp = new AhhSteroidHealer(texAsteroid, Vector2.Zero);
-                        tmpPowerUp.Mass = 1;
                         asteroids.Add(tmpPowerUp);
                         deadAsteroids.Enqueue(tmpPowerUp);
                         break;
@@ -151,10 +142,6 @@ namespace SpaceWars
             gameSFXs = new Dictionary<string, SoundEffect> ();
             gameSFXs.Add ( "launch", content.Load<SoundEffect> ( "Audio/launch" ) );
             gameSFXs.Add ( "explode", content.Load<SoundEffect> ( "Audio/explosion" ) );
-            gameSFXs.Add ( "explode02", content.Load<SoundEffect> ( "Audio/explosion02" ) );
-            gameSFXs.Add ( "nuke", content.Load<SoundEffect> ( "Audio/scbwnuke" ) );
-            gameSFXs.Add ( "powerup", content.Load<SoundEffect> ( "Audio/powerup" ) );
-            gameSFXs.Add ( "cycle", content.Load<SoundEffect> ( "Audio/cursormove" ) );
 
             // Initialize UI Textures
             iconMissileGemini = content.Load<Texture2D> ( "Sprites/UI/GeminiMissileIcon" );
@@ -364,11 +351,11 @@ namespace SpaceWars
             }
         }
 
-        /*public void playSFX ( string sfxName ) {
+        public void playSFX ( string sfxName ) {
             gameSFXs[sfxName].Play ();
-        }*/
+        }
 
-        public void drawPlayer1UI (SpriteBatch spriteBatch) {
+        public void drawPlayerUI (SpriteBatch spriteBatch) {
             int counter = 0;
             
             foreach ( CommandCenter.WeaponsList weaponType in  Enum.GetValues(typeof(CommandCenter.WeaponsList) ) ) {
@@ -394,15 +381,10 @@ namespace SpaceWars
                 }
                 counter++;
             }
-        }
-
-        public void drawPlayer2UI(SpriteBatch spriteBatch)
-        {
-            int counter = 0;
 
             foreach (CommandCenter.WeaponsList weaponType in Enum.GetValues(typeof(CommandCenter.WeaponsList)))
             {
-                int x = graphics.Viewport.Width + 25 + 35 * (counter % 7) - 170;
+                int x = graphics.Viewport.Width + 25 + 35 * (counter % 7) - 275;
                 int y = graphics.Viewport.Height + 25 + 10 * (counter / 7) - 120;
                 float scale = 0.3f;
                 Vector2 tmpPos = new Vector2(x, y);
@@ -441,8 +423,7 @@ namespace SpaceWars
 
             player1.Draw ( spriteBatch );
             player2.Draw ( spriteBatch );
-            drawPlayer1UI ( spriteBatch );
-            drawPlayer2UI ( spriteBatch );
+            drawPlayerUI ( spriteBatch );
             if ( currentState == ScreenState.FADE_IN )
                 spriteBatch.Draw ( blackTex,
                     new Rectangle ( 0, 0, graphics.Viewport.Width, graphics.Viewport.Height),
@@ -513,21 +494,6 @@ namespace SpaceWars
                 SpriteEffects.None,
                 0 );
 
-            // Player 1 Stasis Timer
-            tmpVect = new Vector2(25, 80);
-            if (player1.stasisDelay > 0)
-            {
-                spriteBatch.DrawString(fontUI,
-                    "In Stasis: " + player1.stasisDelay,
-                    tmpVect,
-                    Color.Red,
-                    0.0f,
-                    Vector2.Zero,
-                    1,
-                    SpriteEffects.None,
-                    0);
-            }
-
             // Weapon Label player 2
             string output2 = "Gemini Missile: ";
             switch (player2.currentWeapon)
@@ -545,12 +511,12 @@ namespace SpaceWars
                     break;
             };
 
-            Vector2 tmpVect2 = new Vector2(graphics.Viewport.Width - 145, graphics.Viewport.Height - 60);
+            tmpVect = new Vector2(graphics.Viewport.Width - 145, graphics.Viewport.Height - 60);
             output2 += player2.Weapons[player2.currentWeapon];
 
             spriteBatch.DrawString(fontUI,
                 output2,
-                tmpVect2,
+                tmpVect,
                 Color.LimeGreen,
                 0.0f,
                 Vector2.Zero,
@@ -558,23 +524,22 @@ namespace SpaceWars
                 SpriteEffects.None,
                 0);
 
-            // Player 2 Stasis Timer
-            tmpVect2 = new Vector2(graphics.Viewport.Width - 145, graphics.Viewport.Height - 40);
-            if (player2.stasisDelay > 0)
-            {
-                spriteBatch.DrawString(fontUI,
-                    "In Stasis: " + player2.stasisDelay,
-                    tmpVect2,
+            // Stasis Timer
+            tmpVect = new Vector2 ( 25, 80 );
+            if ( player1.stasisDelay > 0 ) {
+                spriteBatch.DrawString ( fontUI,
+                    "In Stasis: " + player1.stasisDelay,
+                    tmpVect,
                     Color.Red,
                     0.0f,
                     Vector2.Zero,
                     1,
                     SpriteEffects.None,
-                    0);
+                    0 );
             }
 
             // Draw Particles
-            
+            Console.WriteLine ( "Drawing Particle" );
             particleSystem.Draw ( spriteBatch );
         }//public override void Draw()
 

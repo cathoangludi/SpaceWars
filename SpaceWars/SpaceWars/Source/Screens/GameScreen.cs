@@ -36,7 +36,7 @@ namespace SpaceWars
         private Random random;
         private KeyboardState prevState;
 
-        private Dictionary<string, SoundEffect> gameSFXs;
+        public static Dictionary<string, SoundEffect> gameSFXs;
 
 
         // Data (assets needed for certain tasks)
@@ -142,6 +142,10 @@ namespace SpaceWars
             gameSFXs = new Dictionary<string, SoundEffect> ();
             gameSFXs.Add ( "launch", content.Load<SoundEffect> ( "Audio/launch" ) );
             gameSFXs.Add ( "explode", content.Load<SoundEffect> ( "Audio/explosion" ) );
+            gameSFXs.Add ( "explode02", content.Load<SoundEffect> ( "Audio/explosion02" ) );
+            gameSFXs.Add ( "nuke", content.Load<SoundEffect> ( "Audio/scbwnuke" ) );
+            gameSFXs.Add ( "powerup", content.Load<SoundEffect> ( "Audio/powerup" ) );
+            gameSFXs.Add ( "cycle", content.Load<SoundEffect> ( "Audio/cursormove" ) );
 
             // Initialize UI Textures
             iconMissileGemini = content.Load<Texture2D> ( "Sprites/UI/GeminiMissileIcon" );
@@ -351,11 +355,11 @@ namespace SpaceWars
             }
         }
 
-        public void playSFX ( string sfxName ) {
+        /*public void playSFX ( string sfxName ) {
             gameSFXs[sfxName].Play ();
-        }
+        }*/
 
-        public void drawPlayerUI (SpriteBatch spriteBatch) {
+        public void drawPlayer1UI (SpriteBatch spriteBatch) {
             int counter = 0;
             
             foreach ( CommandCenter.WeaponsList weaponType in  Enum.GetValues(typeof(CommandCenter.WeaponsList) ) ) {
@@ -381,10 +385,15 @@ namespace SpaceWars
                 }
                 counter++;
             }
+        }
+
+        public void drawPlayer2UI(SpriteBatch spriteBatch)
+        {
+            int counter = 0;
 
             foreach (CommandCenter.WeaponsList weaponType in Enum.GetValues(typeof(CommandCenter.WeaponsList)))
             {
-                int x = graphics.Viewport.Width + 25 + 35 * (counter % 7) - 275;
+                int x = graphics.Viewport.Width + 25 + 35 * (counter % 7) - 170;
                 int y = graphics.Viewport.Height + 25 + 10 * (counter / 7) - 120;
                 float scale = 0.3f;
                 Vector2 tmpPos = new Vector2(x, y);
@@ -423,7 +432,8 @@ namespace SpaceWars
 
             player1.Draw ( spriteBatch );
             player2.Draw ( spriteBatch );
-            drawPlayerUI ( spriteBatch );
+            drawPlayer1UI ( spriteBatch );
+            drawPlayer2UI ( spriteBatch );
             if ( currentState == ScreenState.FADE_IN )
                 spriteBatch.Draw ( blackTex,
                     new Rectangle ( 0, 0, graphics.Viewport.Width, graphics.Viewport.Height),
@@ -494,6 +504,21 @@ namespace SpaceWars
                 SpriteEffects.None,
                 0 );
 
+            // Player 1 Stasis Timer
+            tmpVect = new Vector2(25, 80);
+            if (player1.stasisDelay > 0)
+            {
+                spriteBatch.DrawString(fontUI,
+                    "In Stasis: " + player1.stasisDelay,
+                    tmpVect,
+                    Color.Red,
+                    0.0f,
+                    Vector2.Zero,
+                    1,
+                    SpriteEffects.None,
+                    0);
+            }
+
             // Weapon Label player 2
             string output2 = "Gemini Missile: ";
             switch (player2.currentWeapon)
@@ -511,12 +536,12 @@ namespace SpaceWars
                     break;
             };
 
-            tmpVect = new Vector2(graphics.Viewport.Width - 145, graphics.Viewport.Height - 60);
+            Vector2 tmpVect2 = new Vector2(graphics.Viewport.Width - 145, graphics.Viewport.Height - 60);
             output2 += player2.Weapons[player2.currentWeapon];
 
             spriteBatch.DrawString(fontUI,
                 output2,
-                tmpVect,
+                tmpVect2,
                 Color.LimeGreen,
                 0.0f,
                 Vector2.Zero,
@@ -524,22 +549,23 @@ namespace SpaceWars
                 SpriteEffects.None,
                 0);
 
-            // Stasis Timer
-            tmpVect = new Vector2 ( 25, 80 );
-            if ( player1.stasisDelay > 0 ) {
-                spriteBatch.DrawString ( fontUI,
-                    "In Stasis: " + player1.stasisDelay,
-                    tmpVect,
+            // Player 2 Stasis Timer
+            tmpVect2 = new Vector2(graphics.Viewport.Width - 145, graphics.Viewport.Height - 40);
+            if (player2.stasisDelay > 0)
+            {
+                spriteBatch.DrawString(fontUI,
+                    "In Stasis: " + player2.stasisDelay,
+                    tmpVect2,
                     Color.Red,
                     0.0f,
                     Vector2.Zero,
                     1,
                     SpriteEffects.None,
-                    0 );
+                    0);
             }
 
             // Draw Particles
-            Console.WriteLine ( "Drawing Particle" );
+            
             particleSystem.Draw ( spriteBatch );
         }//public override void Draw()
 
